@@ -1,4 +1,5 @@
 ﻿
+
 var input = File.ReadAllLines("Input.txt");
 
 var safeLevels = 0;
@@ -12,6 +13,11 @@ foreach (var report in input)
     if (!isSafe)
     {
         isSafe = CheckIsSafe(levels.Reverse().ToArray());
+    }
+
+    if (!isSafe)
+    {
+        isSafe = RemoveLevelsAndCheckIsSafe(levels);
     }
 
     Console.WriteLine($"{report} = {isSafe}");
@@ -37,4 +43,24 @@ bool CheckIsSafe(int[] levels)
     }
 
     return true;
+}
+
+bool RemoveLevelsAndCheckIsSafe(int[] levels)
+{
+    for (var i = 0; i < levels.Length; i++)
+    {
+        var isSafe = CheckIsSafe(levels.Take(i).Concat(levels.Skip(i + 1)).ToArray());
+
+        if (!isSafe)
+        {
+            isSafe = CheckIsSafe(levels.Reverse().Take(i).Concat(levels.Reverse().Skip(i + 1)).ToArray());
+        }
+
+        if (isSafe)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
