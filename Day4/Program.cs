@@ -6,13 +6,20 @@ var grid = input.Select(x => x.ToCharArray()).ToArray();
 
 var total = 0;
 
-for (int row = 0; row < grid.Length; row++)
+for (int row = 1; row < grid.Length - 1; row++)
 {
-    for (int col = 0; col < grid[row].Length; col++)
+    for (int col = 1; col < grid[row].Length - 1; col++)
     {
-        if (grid[row][col] == 'X')
+        //if (grid[row][col] == 'X')
+        //{
+        //    total += FindXmas(row, col);
+        //}
+        if (grid[row][col] == 'A')
         {
-            total += FindXmas(row, col);
+            if (FindMas(row, col))
+            {
+                total += 1;
+            };
         }
     }
 }
@@ -110,34 +117,29 @@ int FindXmas(int row, int col)
     return count;
 }
 
-
-/*
-Console.WriteLine("Rows");
-
-for (var row = 0; row < grid.Length; row++)
+bool FindMas(int row, int col)
 {
-    var line = new string(grid[row]);
-    var count = FindXmas(line);
+    var count = 0;
 
-    Console.WriteLine($"{line} = {count}");
+    if ((grid[row - 1][col - 1] == 'M') && (grid[row + 1][col + 1] == 'S'))
+    {
+        count += 1;
+    }
 
-    total += count;
+    if ((grid[row - 1][col + 1] == 'M') && (grid[row + 1][col - 1] == 'S'))
+    {
+        count += 1;
+    }
+
+    if ((grid[row + 1][col - 1] == 'M') && (grid[row - 1][col + 1] == 'S'))
+    {
+        count += 1;
+    }
+
+    if ((grid[row + 1][col + 1] == 'M') && (grid[row - 1][col - 1] == 'S'))
+    {
+        count += 1;
+    }
+
+    return count == 2;
 }
-
-Console.WriteLine("Columns");
-
-for (var col = 0; col < grid[0].Length; col++)
-{
-    var line = new string(grid.Select(r => r[col]).ToArray());
-    var count = FindXmas(line);
-
-    Console.WriteLine($"{line} = {count}");
-
-    total += count;
-}
-
-int FindXmas(string line)
-{
-    return Regex.Count(line, "XMAS") + Regex.Count(line, "SAMX");
-}
-*/
