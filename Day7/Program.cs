@@ -8,7 +8,7 @@ foreach (var collabaration in collabarations)
 {
     if (CheckCollaberation(collabaration))
     {
-        Console.WriteLine(collabaration);
+        Console.WriteLine(string.Join(' ', collabaration));
 
         total += collabaration[0];
     }
@@ -22,6 +22,7 @@ bool CheckCollaberation(long[] collabaration)
 
     results.AddRange(AddNext(collabaration[1], collabaration.Skip(2)));
     results.AddRange(MultiplyNext(collabaration[1], collabaration.Skip(2)));
+    results.AddRange(ConcatenateNext(collabaration[1], collabaration.Skip(2)));
 
     return results.Contains(collabaration[0]);
 }
@@ -35,7 +36,7 @@ IEnumerable<long> AddNext(long value, IEnumerable<long> remainingValues)
         return [value];
     }
 
-    return AddNext(value, remainingValues.Skip(1)).Concat(MultiplyNext(value, remainingValues.Skip(1)));
+    return AddNext(value, remainingValues.Skip(1)).Concat(MultiplyNext(value, remainingValues.Skip(1))).Concat(ConcatenateNext(value, remainingValues.Skip(1)));
 }
 
 IEnumerable<long> MultiplyNext(long value, IEnumerable<long> remainingValues)
@@ -47,5 +48,17 @@ IEnumerable<long> MultiplyNext(long value, IEnumerable<long> remainingValues)
         return [value];
     }
 
-    return AddNext(value, remainingValues.Skip(1)).Concat(MultiplyNext(value, remainingValues.Skip(1)));
+    return AddNext(value, remainingValues.Skip(1)).Concat(MultiplyNext(value, remainingValues.Skip(1))).Concat(ConcatenateNext(value, remainingValues.Skip(1)));
+}
+
+IEnumerable<long> ConcatenateNext(long value, IEnumerable<long> remainingValues)
+{
+    value = long.Parse($"{value}{remainingValues.ElementAt(0)}");
+
+    if (remainingValues.Count() == 1)
+    {
+        return [value];
+    }
+
+    return AddNext(value, remainingValues.Skip(1)).Concat(MultiplyNext(value, remainingValues.Skip(1))).Concat(ConcatenateNext(value, remainingValues.Skip(1)));
 }
