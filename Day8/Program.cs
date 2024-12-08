@@ -51,7 +51,7 @@ for (var row = 0; row < grid.Length; row++)
     Console.WriteLine();
 }
 
-var total = antinodes.Distinct().Count();
+var total = antinodes.Distinct().Count() + antennas.Count();
 
 Console.WriteLine();
 Console.WriteLine($"Total = {total}");
@@ -76,7 +76,12 @@ void AddAntinode(Antenna antenna, int diffRow, int diffCol)
 
     if ((antinode.Row >= 0) && (antinode.Row < grid.Length) && (antinode.Col >= 0) && (antinode.Col < grid[antinode.Row].Length))
     {
-        antinodes.Add(antinode);
+        if (grid[antinode.Row][antinode.Col] == '.')
+        {
+            antinodes.Add(antinode);
+        }
+
+        AddAntinode(antinode, diffRow, diffCol);
     }
 }
 
