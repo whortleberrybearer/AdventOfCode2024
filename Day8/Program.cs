@@ -1,5 +1,4 @@
-﻿
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(x => x.ToCharArray()).ToArray();
 var antennas = new List<Antenna>();
 var antinodes = new List<Antenna>();
