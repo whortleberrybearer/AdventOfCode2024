@@ -1,7 +1,4 @@
-﻿
-using System.Collections.Generic;
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(i => i.Select(c => c == '.' ? -1 : int.Parse(c.ToString())).ToArray()).ToArray();
 
 var total = 0;
@@ -12,7 +9,8 @@ for (var row = 0; row < grid.Length; row++)
     {
         if (grid[row][col] == 0)
         {
-            var trailHeads = FindTrailHeads(0, row, col).Distinct();
+            //var trailHeads = FindTrailHeads(0, row, col).Distinct();
+            var trailHeads = FindTrailHeads(0, row, col);
 
             Console.WriteLine($"{row},{col} = {trailHeads.Count()}");
 
