@@ -7,7 +7,7 @@ foreach (var stone in stones)
     stoneLookups.Add(stone, new Stone() { Value = stone });
 }
 
-var blinks = 6;
+var blinks = 75;
 
 for (var i = 0; i < blinks; i++)
 {
@@ -36,25 +36,30 @@ var newStones = new List<Stone>();
 
 foreach (var stone in stones)
 {
-    newStones.Add(stoneLookups[stone]);
+    stoneLookups[stone].Number = 1;
 }
 
 for (var i = 0; i < blinks; i++)
 {
     Console.WriteLine($"Blink {i + 1}");
 
-    var existingStones = newStones.ToArray();
-    newStones = new List<Stone>();
-
-    foreach (var stone in existingStones)
+    foreach (var stone in stoneLookups.Values.Where(sl => sl.Number > 0).ToArray())
     {
-        newStones.AddRange(stone.Next);
+        stone.Blink();
     }
 
-    Console.WriteLine(string.Join(" ", newStones.Select(ns => ns.Value)));
+    foreach (var stone in stoneLookups.Values.ToArray())
+    {
+        stone.ResetNumber();
+    }
 }
 
-var total = newStones.Count;
+var total = 0L;
+
+foreach (var stone in stoneLookups.Values)
+{
+    total += stone.Number;
+}
 
 Console.WriteLine($"Total = {total}");
 
@@ -74,4 +79,22 @@ class Stone
     public string Value { get; init; }
 
     public List<Stone> Next { get; } = new List<Stone>();
+
+    public long Number { get; set; }
+
+    public long NewNumber { get; set; }
+
+    public void Blink()
+    {
+        foreach (var stone in Next)
+        {
+            stone.NewNumber += Number;
+        }
+    }
+
+    public void ResetNumber()
+    {
+        Number = NewNumber;
+        NewNumber = 0;
+    }
 }
