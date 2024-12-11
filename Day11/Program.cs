@@ -1,37 +1,77 @@
 ﻿var input = File.ReadAllLines("Input.txt");
 var stones = input[0].Split(' ').ToList();
+var stoneLookups = new Dictionary<string, Stone>();
 
-for (var i = 0; i < 25; i++)
+foreach (var stone in stones)
 {
-    for (var j = 0; j < stones.Count; j++)
+    stoneLookups.Add(stone, new Stone() { Value = stone });
+}
+
+var blinks = 6;
+
+for (var i = 0; i < blinks; i++)
+{
+    foreach (var stone in stoneLookups.Values.Where(s => !s.Next.Any()).ToArray())
     {
-        if (stones[j] == "0")
+        if (stone.Value == "0")
         {
-            stones[j] = "1";
+            stone.Next.Add(GetAndAddStone("1"));
         }
-        else if (stones[j].Length % 2 == 0)
+        else if (stone.Value.Length % 2 == 0)
         {
-            var toSplit = stones[j];
+            var left = stone.Value.Substring(0, stone.Value.Length / 2);
+            var right = long.Parse(stone.Value.Substring(stone.Value.Length / 2)).ToString();
 
-            var left = toSplit.Substring(0, toSplit.Length / 2);
-            var right = long.Parse(toSplit.Substring(toSplit.Length / 2)).ToString();
-
-            stones[j] = left;
-            
-            stones.Insert(j + 1, right);
-
-            // Move j along so not to process the stone just added.
-            j += 1;
+            stone.Next.Add(GetAndAddStone(left));
+            stone.Next.Add(GetAndAddStone(right));
         }
         else
         {
-            stones[j] = (long.Parse(stones[j]) * 2024).ToString();
+            stone.Next.Add(GetAndAddStone((long.Parse(stone.Value) * 2024).ToString()));
         }
     }
-
-    Console.WriteLine(string.Join(" ", stones));
 }
 
-var total = stones.Count;
+var newStones = new List<Stone>();
+
+foreach (var stone in stones)
+{
+    newStones.Add(stoneLookups[stone]);
+}
+
+for (var i = 0; i < blinks; i++)
+{
+    Console.WriteLine($"Blink {i + 1}");
+
+    var existingStones = newStones.ToArray();
+    newStones = new List<Stone>();
+
+    foreach (var stone in existingStones)
+    {
+        newStones.AddRange(stone.Next);
+    }
+
+    Console.WriteLine(string.Join(" ", newStones.Select(ns => ns.Value)));
+}
+
+var total = newStones.Count;
 
 Console.WriteLine($"Total = {total}");
+
+Stone GetAndAddStone(string value)
+{
+    if (!stoneLookups.TryGetValue(value, out var nextStone))
+    {
+        nextStone = new Stone() { Value = value };
+        stoneLookups.Add(nextStone.Value, nextStone);
+    }
+
+    return nextStone;
+}
+
+class Stone
+{
+    public string Value { get; init; }
+
+    public List<Stone> Next { get; } = new List<Stone>();
+}
