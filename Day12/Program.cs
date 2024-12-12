@@ -70,7 +70,7 @@ var total = 0;
 
 foreach (var group in groups)
 {
-    var fences = group.Sum(g => g.Fenses);
+    var fences = group.Sum(g => g.Fences.Count());
     var cost = group.Count() * fences;
 
     Console.WriteLine($"Group {group.First().Plant} = Area:{group.Count()} * Parameter:{fences} = {cost}");
@@ -99,7 +99,35 @@ class Plot
 
     public List<Plot> Related { get; } = new List<Plot>();
 
-    public int Fenses => 4 - Related.Count;
+    public IEnumerable<Fence> Fences 
+    {
+        get
+        {
+            var fences = new List<Fence>();
+
+            if (!Related.Any(r => r.Row == Row - 1 && r.Col == Col))
+            {
+                fences.Add(new Fence() { Row = Row, Col = Col, Position = 'T' });
+            }
+
+            if (!Related.Any(r => r.Row == Row && r.Col == Col + 1))
+            {
+                fences.Add(new Fence() { Row = Row, Col = Col, Position = 'R' });
+            }
+
+            if (!Related.Any(r => r.Row == Row + 1 && r.Col == Col))
+            {
+                fences.Add(new Fence() { Row = Row, Col = Col, Position = 'B' });
+            }
+
+            if (!Related.Any(r => r.Row == Row && r.Col == Col - 1))
+            {
+                fences.Add(new Fence() { Row = Row, Col = Col, Position = 'L' });
+            }
+
+            return fences;
+        }
+    }
 
     public void AddNext(Plot plot)
     {
@@ -121,4 +149,13 @@ class Plot
             }
         }
     }
+}
+
+public class Fence
+{
+    public int Row { get; init; }
+
+    public int Col { get; init; }
+
+    public char Position { get; init; }
 }
