@@ -1,7 +1,4 @@
-﻿
-
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(i => i.ToCharArray()).ToArray();
 var plots = new Plot[grid.Length][];
 
@@ -28,22 +25,22 @@ for (var row = 0; row < plots.Length; row++)
 
         if (row > 0)
         {
-            CheckNexPlot(plot, plots[row - 1][col]);
+            CheckNextPlot(plot, plots[row - 1][col]);
         }
 
         if (row < (grid.Length - 1))
         {
-            CheckNexPlot(plot, plots[row + 1][col]);
+            CheckNextPlot(plot, plots[row + 1][col]);
         }
 
         if (col > 0)
         {
-            CheckNexPlot(plot, plots[row][col - 1]);
+            CheckNextPlot(plot, plots[row][col - 1]);
         }
 
-        if (col < (grid.Length - 1))
+        if (col < (grid[row].Length - 1))
         {
-            CheckNexPlot(plot, plots[row][col + 1]);
+            CheckNextPlot(plot, plots[row][col + 1]);
         }
     }
 }
@@ -70,23 +67,66 @@ var total = 0;
 
 foreach (var group in groups)
 {
-    var fences = group.Sum(g => g.Fences.Count());
-    var cost = group.Count() * fences;
+    //var fences = group.Sum(g => g.Fences.Count());
+    //var cost = group.Count() * fences;
 
-    Console.WriteLine($"Group {group.First().Plant} = Area:{group.Count()} * Parameter:{fences} = {cost}");
+    //Console.WriteLine($"Group {group.First().Plant} = Area:{group.Count()} * Parameter:{fences} = {cost}");
+
+    var edges = FindEdges(group.SelectMany(g => g.Fences).ToArray());
+    var cost = group.Count() * edges;
+
+    Console.WriteLine($"Group {group.First().Plant} = Area:{group.Count()} * Edges:{edges} = {cost}");
 
     total += cost;
 }
 
 Console.WriteLine($"Total = {total}");
 
-void CheckNexPlot(Plot currentPlot, Plot nextPlot)
+void CheckNextPlot(Plot currentPlot, Plot nextPlot)
 {
     if (currentPlot.Plant == nextPlot.Plant)
     {
         currentPlot.AddNext(nextPlot);
         nextPlot.AddNext(currentPlot);
     }
+}
+
+int FindEdges(IEnumerable<Fence> fences)
+{
+    var remainingEdges = new List<Fence>(fences);
+
+    for (var i = 0; i < fences.Count(); i++)
+    {
+        var fence = fences.ElementAt(i);
+        var nextRow = fence.Row;
+        var nextCol = fence.Col;
+
+        if (fence.Position == 'T')
+        {
+            nextCol += 1;
+        }
+        else if (fence.Position == 'R')
+        {
+            nextRow += 1;
+        }
+        else if (fence.Position == 'B')
+        {
+            nextCol -= 1;
+        }
+        else if (fence.Position == 'L')
+        {
+            nextRow -= 1;
+        }
+
+        var nextFence = fences.FirstOrDefault(f => f.Position == fence.Position && f.Row == nextRow && f.Col == nextCol);
+
+        if (nextFence is not null)
+        {
+            remainingEdges.Remove(fence);
+        }
+    }
+
+    return remainingEdges.Count();
 }
 
 class Plot
@@ -151,7 +191,7 @@ class Plot
     }
 }
 
-public class Fence
+class Fence
 {
     public int Row { get; init; }
 
