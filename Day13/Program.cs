@@ -25,8 +25,8 @@ foreach (var line in input)
         {
             game.Prize = ExtractPosition(line.Replace("Prize: ", string.Empty));
 
-            //game.Prize.X += 10000000000000L;
-            //game.Prize.Y += 10000000000000L;
+            game.Prize.X += 10000000000000L;
+            game.Prize.Y += 10000000000000L;
         }
     }
 }
