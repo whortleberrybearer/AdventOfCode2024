@@ -24,11 +24,14 @@ foreach (var line in input)
         else if (line.StartsWith("Prize"))
         {
             game.Prize = ExtractPosition(line.Replace("Prize: ", string.Empty));
+
+            //game.Prize.X += 10000000000000L;
+            //game.Prize.Y += 10000000000000L;
         }
     }
 }
 
-var total = 0;
+var total = 0L;
 
 for (var i = 0; i < games.Count; i++)
 {
@@ -47,7 +50,7 @@ Poisition ExtractPosition(string line)
 {
     var parts = line.Split(new char[] { ' ', ',', '+', '=' }, StringSplitOptions.RemoveEmptyEntries);
 
-    return new Poisition() { X = int.Parse(parts[1]), Y = int.Parse(parts[3]) };
+    return new Poisition() { X = long.Parse(parts[1]), Y = long.Parse(parts[3]) };
 }
 
 public class Game
@@ -58,75 +61,31 @@ public class Game
 
     public Poisition Prize { get; set; }
 
-    public int FindTokens()
+    public long FindTokens()
     {
-        var minTokens = 0;
+        var delta = ButtonA.X * ButtonB.Y - ButtonA.Y * ButtonB.X;
 
-        for (var i = 1; i < 100; i++)
+        if (delta == 0)
+            throw new ArgumentException("Lines are parallel");
+
+        var x = Math.DivRem(ButtonB.Y * Prize.X - ButtonB.X * Prize.Y, delta);
+        var y = Math.DivRem(ButtonA.X * Prize.Y - ButtonA.Y * Prize.X, delta);
+
+        // A 0 remained means they intersect on a valid move.
+        if (x.Remainder == 0 && y.Remainder == 0)
         {
-            var aPos = ButtonA * i;
-
-            if ((aPos.X > Prize.X) || (aPos.Y > Prize.Y))
-            {
-                // Beyond the prize.
-                break;
-            }
-
-            var xDiv = Math.DivRem(Prize.X - aPos.X, ButtonB.X);
-
-            if (xDiv.Remainder == 0)
-            {
-                var yDiv = Math.DivRem(Prize.Y - aPos.Y, ButtonB.Y);
-                
-                if ((yDiv.Remainder == 0) && (yDiv.Quotient == xDiv.Quotient))
-                {
-                    var tokens = (i * 3) + yDiv.Quotient;
-
-                    if ((minTokens == 0) || (tokens < minTokens))
-                    {
-                        minTokens = tokens;
-                    }
-                }
-            }
+            return (x.Quotient * 3) + y.Quotient;
         }
 
-        for (var i = 1; i < 100; i++)
-        {
-            var bPos = ButtonB * i;
-
-            if ((bPos.X > Prize.X) || (bPos.Y > Prize.Y))
-            {
-                // Beyond the prize.
-                break;
-            }
-
-            var xDiv = Math.DivRem(Prize.X - bPos.X, ButtonA.X);
-
-            if (xDiv.Remainder == 0)
-            {
-                var yDiv = Math.DivRem(Prize.Y - bPos.Y, ButtonA.Y);
-
-                if ((yDiv.Remainder == 0) && (yDiv.Quotient == xDiv.Quotient))
-                {
-                    var tokens = i + (yDiv.Quotient * 3);
-
-                    if ((minTokens == 0) || (tokens < minTokens))
-                    {
-                        minTokens = tokens;
-                    }
-                }
-            }
-        }
-
-        return minTokens;
+        return 0;
     }
 }
 
 public class Poisition
 {
-    public int X { get; set; }
+    public long X { get; set; }
 
-    public int Y { get; set; }
+    public long Y { get; set; }
 
-    public static Poisition operator *(Poisition pos, int i) => new Poisition() { X = pos.X * i, Y = pos.Y * i };
+    public static Poisition operator *(Poisition pos, long i) => new Poisition() { X = pos.X * i, Y = pos.Y * i };
 }
