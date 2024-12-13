@@ -1,5 +1,4 @@
-﻿
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var games = new List<Game>();
 
 var game = new Game();
@@ -42,8 +41,6 @@ for (var i = 0; i < games.Count; i++)
     total += tokens;
 }
 
-// 48670 too high
-
 Console.WriteLine($"Total = {total}");
 
 Poisition ExtractPosition(string line)
@@ -80,10 +77,38 @@ public class Game
             if (xDiv.Remainder == 0)
             {
                 var yDiv = Math.DivRem(Prize.Y - aPos.Y, ButtonB.Y);
-
-                if (yDiv.Remainder == 0)
+                
+                if ((yDiv.Remainder == 0) && (yDiv.Quotient == xDiv.Quotient))
                 {
                     var tokens = (i * 3) + yDiv.Quotient;
+
+                    if ((minTokens == 0) || (tokens < minTokens))
+                    {
+                        minTokens = tokens;
+                    }
+                }
+            }
+        }
+
+        for (var i = 1; i < 100; i++)
+        {
+            var bPos = ButtonB * i;
+
+            if ((bPos.X > Prize.X) || (bPos.Y > Prize.Y))
+            {
+                // Beyond the prize.
+                break;
+            }
+
+            var xDiv = Math.DivRem(Prize.X - bPos.X, ButtonA.X);
+
+            if (xDiv.Remainder == 0)
+            {
+                var yDiv = Math.DivRem(Prize.Y - bPos.Y, ButtonA.Y);
+
+                if ((yDiv.Remainder == 0) && (yDiv.Quotient == xDiv.Quotient))
+                {
+                    var tokens = i + (yDiv.Quotient * 3);
 
                     if ((minTokens == 0) || (tokens < minTokens))
                     {
