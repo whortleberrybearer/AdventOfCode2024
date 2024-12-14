@@ -25,51 +25,90 @@ foreach (var i in input)
 var maxRow = robots.Max(r => r.Posiition.Y) + 1;
 var maxCol = robots.Max(r => r.Posiition.X) + 1;
 
-foreach (var robot in robots)
-{
-    robot.MultipleMove(100, maxRow, maxCol);
-}
+// Not sure if this will work, just looking for robots next to each other.
+var requiredSiblings = 250;
+var second = 0;
 
-for (var row = 0; row < maxRow; row++)
+for (; second < 10000; second++)
 {
-    for (var col = 0; col < maxCol; col++)
+    foreach (var robot in robots)
     {
-        var count = robots.Count(r => r.Posiition.X == col && r.Posiition.Y == row);
-
-        Console.Write(count == 0 ? "." : count.ToString());
+        robot.MultipleMove(1, maxRow, maxCol);
     }
 
-    Console.WriteLine();
+    var noSiblings = 0;
+    var j = 0;
+    
+    for (; j < robots.Count; j++)
+    {
+        var sibling = robots.FirstOrDefault(r => 
+            (r != robots[j]) && 
+            (r.Posiition.X >= robots[j].Posiition.X - 1) && 
+            (r.Posiition.X <= robots[j].Posiition.X + 1) &&
+            (r.Posiition.Y >= robots[j].Posiition.Y + 1) &&
+            (r.Posiition.Y <= robots[j].Posiition.Y + 1));
+
+        if (sibling == null)
+        {
+            noSiblings += 1;
+
+            if (noSiblings >= requiredSiblings)
+            {
+                break;
+            }
+        }
+    }
+
+    Console.WriteLine($"Pass: {second}, Checks: {j}");
+
+    if (noSiblings < requiredSiblings)
+    {
+        for (var row = 0; row < maxRow; row++)
+        {
+            for (var col = 0; col < maxCol; col++)
+            {
+                var count = robots.Count(r => r.Posiition.X == col && r.Posiition.Y == row);
+
+                Console.Write(count == 0 ? "." : count.ToString());
+            }
+
+            Console.WriteLine();
+        }
+
+        Console.WriteLine();
+        Console.WriteLine();
+
+        break;
+    }
 }
 
-Console.WriteLine();
-Console.WriteLine();
+//var xDiv = Math.DivRem(maxCol, 2);
+//var yDiv = Math.DivRem(maxRow, 2);
 
-var xDiv = Math.DivRem(maxCol, 2);
-var yDiv = Math.DivRem(maxRow, 2);
+//var rightQuadrantStart = xDiv.Quotient;
 
-var rightQuadrantStart = xDiv.Quotient;
+//if (xDiv.Remainder != 0)
+//{
+//    rightQuadrantStart += 1;
+//}
 
-if (xDiv.Remainder != 0)
-{
-    rightQuadrantStart += 1;
-}
+//var bottomQuadrantStart = yDiv.Quotient;
 
-var bottomQuadrantStart = yDiv.Quotient;
+//if (yDiv.Remainder != 0)
+//{
+//    bottomQuadrantStart += 1;
+//}
 
-if (yDiv.Remainder != 0)
-{
-    bottomQuadrantStart += 1;
-}
+//var topLeft = robots.Count(r => r.Posiition.X < xDiv.Quotient && r.Posiition.Y < yDiv.Quotient);
+//var topRight = robots.Count(r => r.Posiition.X >= rightQuadrantStart && r.Posiition.Y < yDiv.Quotient);
+//var bottomLeft = robots.Count(r => r.Posiition.X < xDiv.Quotient && r.Posiition.Y >= bottomQuadrantStart);
+//var bottomRight = robots.Count(r => r.Posiition.X >= rightQuadrantStart && r.Posiition.Y >= bottomQuadrantStart);
 
-var topLeft = robots.Count(r => r.Posiition.X < xDiv.Quotient && r.Posiition.Y < yDiv.Quotient);
-var topRight = robots.Count(r => r.Posiition.X >= rightQuadrantStart && r.Posiition.Y < yDiv.Quotient);
-var bottomLeft = robots.Count(r => r.Posiition.X < xDiv.Quotient && r.Posiition.Y >= bottomQuadrantStart);
-var bottomRight = robots.Count(r => r.Posiition.X >= rightQuadrantStart && r.Posiition.Y >= bottomQuadrantStart);
+//Console.WriteLine($"TL={topLeft}, TR={topRight}, BL={bottomLeft}, BR={bottomRight}");
 
-Console.WriteLine($"TL={topLeft}, TR={topRight}, BL={bottomLeft}, BR={bottomRight}");
+//var total = topLeft * topRight * bottomLeft * bottomRight;
 
-var total = topLeft * topRight * bottomLeft * bottomRight;
+var total = second + 1;
 
 Console.WriteLine($"Total = {total}");
 
