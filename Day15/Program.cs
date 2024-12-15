@@ -1,6 +1,4 @@
-﻿
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var mapEnd = input.Count(i => i.Contains("#"));
 var map = input.Take(mapEnd).Select(i => i.Replace("#", "##").Replace(".", "..").Replace("O","[]").Replace("@", "@.").ToCharArray()).ToArray();
 var movements = string.Join(string.Empty, input.Skip(mapEnd + 1));
