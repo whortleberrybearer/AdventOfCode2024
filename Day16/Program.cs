@@ -1,7 +1,4 @@
-﻿
-
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(i => i.ToCharArray()).ToArray();
 
 Position startPositiom = new Position();
@@ -99,28 +96,9 @@ do
 }
 while (pathsToExpand.Any());
 
-var bestPositions = ExpandPossibleSteps(
-    expansions[endPositiom.Row][endPositiom.Col].ShortestPaths.SelectMany(sp => sp.Movements).Select(m => m.Position).Distinct().ToArray(),
-    Enumerable.Empty<Position>());
+var bestPositions = new List<Position>();
 
-IEnumerable<Position> ExpandPossibleSteps(IEnumerable<Position> positions, IEnumerable<Position> knownPositions)
-{
-    var possiblePositions = new List<Position>(knownPositions);
-
-    foreach (var position in positions)
-    {
-        possiblePositions.Add(position);
-
-        if (expansions[position.Row][position.Col] is not null)
-        {
-            var additionalPositions = expansions[position.Row][position.Col].ShortestPaths.SelectMany(sp => sp.Movements).Select(m => m.Position).Distinct().Except(knownPositions).ToArray();
-
-            possiblePositions.AddRange(ExpandPossibleSteps(additionalPositions, possiblePositions));
-        }
-    }
-
-    return possiblePositions.Distinct().ToArray();
-}
+ExpandPossibleSteps(expansions[endPositiom.Row][endPositiom.Col].ShortestPaths.SelectMany(sp => sp.Movements).Select(m => m.Position).Distinct().ToArray(), bestPositions);
 
 Console.WriteLine();
 
@@ -213,6 +191,24 @@ List<Movement> GetMovements(Position position, char direction)
     }
 
     return movements;
+}
+
+void ExpandPossibleSteps(IEnumerable<Position> positions, List<Position> knownPositions)
+{
+    foreach (var position in positions)
+    {
+        if (!knownPositions.Contains(position))
+        {
+            knownPositions.Add(position);
+        }
+
+        if (expansions[position.Row][position.Col]?.ShortestPaths.Count > 1)
+        {
+            var additionalPositions = expansions[position.Row][position.Col].ShortestPaths.SelectMany(sp => sp.Movements).Select(m => m.Position).Distinct().Except(knownPositions).ToList();
+
+            ExpandPossibleSteps(additionalPositions, knownPositions);
+        }
+    }
 }
 
 struct Position
