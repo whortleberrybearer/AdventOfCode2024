@@ -1,4 +1,6 @@
 ﻿
+
+
 var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(i => i.ToCharArray()).ToArray();
 
@@ -60,6 +62,11 @@ do
             newPath.Movements.AddRange(path.Movements);
             newPath.Movements.Add(nextMove);
 
+            if (nextMove.Position.Row == 8 && nextMove.Position.Col == 3)
+            {
+                int i = 0;
+            }
+
             var existingExpansion = expansions[nextMove.Position.Row][nextMove.Position.Col];
 
             if ((existingExpansion is null) || (newPath.Distance <= existingExpansion.Distance))
@@ -68,11 +75,18 @@ do
                 {
                     existingExpansion = new PathPoint();
                     expansions[nextMove.Position.Row][nextMove.Position.Col] = existingExpansion;
+
+                    if (grid[nextMove.Position.Row][nextMove.Position.Col] != 'E')
+                    {
+                        pathsToExpand.Add(newPath);
+                    }
                 }
 
                 existingExpansion.ShortestPaths.Add(newPath);
                 existingExpansion.Distance = newPath.Distance;
-
+            }
+            else if (newPath.Distance <= existingExpansion.Distance + 1000)
+            {
                 if (grid[nextMove.Position.Row][nextMove.Position.Col] != 'E')
                 {
                     pathsToExpand.Add(newPath);
@@ -85,7 +99,52 @@ do
 }
 while (pathsToExpand.Any());
 
-var total = expansions[endPositiom.Row][endPositiom.Col].Distance;
+var bestPositions = ExpandPossibleSteps(
+    expansions[endPositiom.Row][endPositiom.Col].ShortestPaths.SelectMany(sp => sp.Movements).Select(m => m.Position).Distinct().ToArray(),
+    Enumerable.Empty<Position>());
+
+IEnumerable<Position> ExpandPossibleSteps(IEnumerable<Position> positions, IEnumerable<Position> knownPositions)
+{
+    var possiblePositions = new List<Position>(knownPositions);
+
+    foreach (var position in positions)
+    {
+        possiblePositions.Add(position);
+
+        if (expansions[position.Row][position.Col] is not null)
+        {
+            var additionalPositions = expansions[position.Row][position.Col].ShortestPaths.SelectMany(sp => sp.Movements).Select(m => m.Position).Distinct().Except(knownPositions).ToArray();
+
+            possiblePositions.AddRange(ExpandPossibleSteps(additionalPositions, possiblePositions));
+        }
+    }
+
+    return possiblePositions.Distinct().ToArray();
+}
+
+Console.WriteLine();
+
+for (var row = 0; row < grid.Length; row++)
+{
+    for (var col = 0; col < grid[row].Length; col++)
+    {
+        if (bestPositions.Any(t => t.Row == row && t.Col == col))
+        {
+            Console.Write('O');
+        }
+        else
+        {
+            Console.Write(grid[row][col]);
+        }
+    }
+
+    Console.WriteLine();
+}
+
+Console.WriteLine();
+
+//var total = expansions[endPositiom.Row][endPositiom.Col].Distance;
+var total = bestPositions.Count() + 1;  // +1 for the start position.
 
 Console.WriteLine($"Total = {total}");
 
