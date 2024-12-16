@@ -28,15 +28,14 @@ for (var row = 0; row < grid.Length; row++)
     }
 }
 
-var expansions = new Path[grid.Length][];
+var expansions = new PathPoint[grid.Length][];
 
 for (var i = 0; i < grid.Length; i++)
 {
-    expansions[i] = new Path[grid[i].Length];
+    expansions[i] = new PathPoint[grid[i].Length];
 }
 
 var pathsToExpand = new List<Path>();
-var shortestPathLength = int.MaxValue;
 
 foreach (var movement in GetMovements(startPositiom, 'E'))
 {
@@ -63,15 +62,18 @@ do
 
             var existingExpansion = expansions[nextMove.Position.Row][nextMove.Position.Col];
 
-            if ((existingExpansion is null) || (newPath.Distance < existingExpansion.Distance))
+            if ((existingExpansion is null) || (newPath.Distance <= existingExpansion.Distance))
             {
-                expansions[nextMove.Position.Row][nextMove.Position.Col] = newPath;
-
-                if (grid[nextMove.Position.Row][nextMove.Position.Col] == 'E')
+                if ((existingExpansion is null) || (newPath.Distance < existingExpansion.Distance))
                 {
-                    shortestPathLength = newPath.Distance;
+                    existingExpansion = new PathPoint();
+                    expansions[nextMove.Position.Row][nextMove.Position.Col] = existingExpansion;
                 }
-                else
+
+                existingExpansion.ShortestPaths.Add(newPath);
+                existingExpansion.Distance = newPath.Distance;
+
+                if (grid[nextMove.Position.Row][nextMove.Position.Col] != 'E')
                 {
                     pathsToExpand.Add(newPath);
                 }
@@ -83,7 +85,7 @@ do
 }
 while (pathsToExpand.Any());
 
-var total = shortestPathLength;
+var total = expansions[endPositiom.Row][endPositiom.Col].Distance;
 
 Console.WriteLine($"Total = {total}");
 
@@ -182,3 +184,10 @@ class Path
         }
     }
 }
+
+class PathPoint
+{
+    public List<Path> ShortestPaths { get; set; } = new List<Path>();
+
+    public int Distance { get; set; }
+} 
