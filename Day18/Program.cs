@@ -25,19 +25,6 @@ foreach (var position in positions.Take(1024))
     grid[position.Y][position.X] = '#';
 }
 
-for (var row = 0; row < grid.Length; row++)
-{
-    for (var col = 0; col < grid[row].Length; col++)
-    {
-        Console.Write(grid[row][col]);
-    }
-
-    Console.WriteLine();
-}
-
-Console.WriteLine();
-Console.WriteLine();
-
 var route = FindPath();
 
 for (var row = 0; row < grid.Length; row++)
@@ -75,10 +62,10 @@ Path FindPath()
     var paths = new List<Path>();
 
     var startPosition = new Position();
-    foreach (var movement in GetPossibleMovements(startPosition, ' '))
+    foreach (var movement in GetPossibleMovements(startPosition))
     {
         var path = new Path();
-        path.Movements.Add(new Movement() { Position = startPosition, Direction = ' ' });
+        path.Movements.Add(new Movement() { Position = startPosition });
         path.Movements.Add(movement);
 
         paths.Add(path);
@@ -93,10 +80,7 @@ Path FindPath()
         var pathToExpand = paths.First();
         paths.RemoveAt(0);
 
-
-        Console.WriteLine($"Expand: X:{pathToExpand.Movements.Last().Position.X}, Y:{pathToExpand.Movements.Last().Position.Y}");
-
-        foreach (var movement in GetPossibleMovements(pathToExpand.Movements.Last().Position, pathToExpand.Movements.Last().Direction))
+        foreach (var movement in GetPossibleMovements(pathToExpand.Movements.Last().Position))
         {
             var path = new Path();
             path.Movements.AddRange(pathToExpand.Movements);
@@ -125,7 +109,7 @@ Path FindPath()
     return bestPath;
 }
 
-IEnumerable<Movement> GetPossibleMovements(Position position, char direction)
+IEnumerable<Movement> GetPossibleMovements(Position position)
 {
     var movements = new List<Movement>();
 
@@ -138,7 +122,6 @@ IEnumerable<Movement> GetPossibleMovements(Position position, char direction)
             movements.Add(new Movement()
             {
                 Position = new Position() { Y = position.Y, X = position.X - 1 },
-                Direction = 'W',
             });
         }
     }
@@ -152,7 +135,6 @@ IEnumerable<Movement> GetPossibleMovements(Position position, char direction)
             movements.Add(new Movement()
             {
                 Position = new Position() { Y = position.Y, X = position.X + 1 },
-                Direction = 'E',
             });
         }
     }
@@ -166,7 +148,6 @@ IEnumerable<Movement> GetPossibleMovements(Position position, char direction)
             movements.Add(new Movement()
             {
                 Position = new Position() { Y = position.Y + 1, X = position.X },
-                Direction = 'S',
             });
         }
     }
@@ -180,7 +161,6 @@ IEnumerable<Movement> GetPossibleMovements(Position position, char direction)
             movements.Add(new Movement()
             {
                 Position = new Position() { Y = position.Y - 1, X = position.X },
-                Direction = 'N',
             });
         }
     }
@@ -198,8 +178,6 @@ struct Position
 class Movement
 {
     public Position Position { get; init; } 
-
-    public char Direction { get; init; }
 }
 
 class Path
