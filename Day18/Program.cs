@@ -20,7 +20,7 @@ for (var i = 0; i < grid.Length; i++)
     grid[i] = Enumerable.Repeat('.', maxX + 1).ToArray();
 }
 
-foreach (var position in positions.Take(12))
+foreach (var position in positions.Take(1024))
 {
     grid[position.Y][position.X] = '#';
 }
