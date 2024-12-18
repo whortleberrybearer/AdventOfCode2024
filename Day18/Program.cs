@@ -20,37 +20,55 @@ for (var i = 0; i < grid.Length; i++)
     grid[i] = Enumerable.Repeat('.', maxX + 1).ToArray();
 }
 
-foreach (var position in positions.Take(1024))
+Path? route = null;
+var nextByte = 12;
+
+foreach (var position in positions.Take(nextByte))
 {
     grid[position.Y][position.X] = '#';
 }
 
-var route = FindPath();
-
-for (var row = 0; row < grid.Length; row++)
+do
 {
-    for (var col = 0; col < grid[row].Length; col++)
+    var nextPosition = positions[nextByte++];
+
+    grid[nextPosition.Y][nextPosition.X] = '#';
+
+    route = FindPath();
+
+    if (route != null)
     {
-        if (route.Movements.Any(m => m.Position.Y == row && m.Position.X == col))
+        for (var row = 0; row < grid.Length; row++)
         {
-            Console.Write('O');
+            for (var col = 0; col < grid[row].Length; col++)
+            {
+                if (route.Movements.Any(m => m.Position.Y == row && m.Position.X == col))
+                {
+                    Console.Write('O');
+                }
+                else
+                {
+                    Console.Write(grid[row][col]);
+                }
+            }
+
+            Console.WriteLine();
         }
-        else
-        {
-            Console.Write(grid[row][col]);
-        }
+
+        Console.WriteLine();
     }
-
-    Console.WriteLine();
 }
+while (route != null);
 
-Console.WriteLine();
+// var total = route.Cost - 1;
 
-var total = route.Cost - 1;
+// Console.WriteLine($"Total = {total}");
 
-Console.WriteLine($"Total = {total}");
+var lastPosition = positions[nextByte - 1];
 
-Path FindPath()
+Console.WriteLine($"Blocker = {lastPosition.X},{lastPosition.Y}");
+
+Path ? FindPath()
 {
     var visited = new Path[maxY + 1][];
 
@@ -71,7 +89,7 @@ Path FindPath()
         paths.Add(path);
     }
 
-    Path bestPath = null;
+    Path? bestPath = null;
 
     while (paths.Count > 0 && (bestPath is null))
     {
