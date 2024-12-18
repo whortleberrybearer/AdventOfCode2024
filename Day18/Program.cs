@@ -21,7 +21,7 @@ for (var i = 0; i < grid.Length; i++)
 }
 
 Path? route = null;
-var nextByte = 12;
+var nextByte = 1024;
 
 foreach (var position in positions.Take(nextByte))
 {
