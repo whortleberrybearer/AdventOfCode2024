@@ -1,24 +1,30 @@
-﻿var input = File.ReadAllLines("Input.txt");
+﻿
+var input = File.ReadAllLines("Input.txt");
 var patterns = input[0].Split(", ");
 var towels = input.Skip(2).ToArray();
 var invalid = 0;
 var expansions = new Dictionary<string, List<Expansion>>();
 
+var total = 0L;
+
 foreach (var towel in towels)
 {
     var expandedOptions = ExpandOptions(towel);
+    var possibleExpansions = expandedOptions.Sum(eo => eo.PossibleExpansionsCount);
 
-    Console.WriteLine($"{towel} has {expandedOptions.Count} expansions");
+    Console.WriteLine($"{towel} has {possibleExpansions} expansions");
 
-    if (!expandedOptions.Any())
-    {
-        Console.WriteLine($"{towel} not valid");
+    total += possibleExpansions;
 
-        invalid += 1;
-    }
+    //if (!expandedOptions.Any())
+    //{
+    //    Console.WriteLine($"{towel} not valid");
+
+    //    invalid += 1;
+    //}
 }
 
-var total = towels.Length - invalid;
+//var total = towels.Length - invalid;
 
 Console.WriteLine($"Total = {total}");
 
@@ -48,12 +54,12 @@ List<Expansion> ExpandOptions(string towel)
 
                 if (endOptions.Any())
                 {
-                    options.Add(new Expansion() { Start = start, End = endOptions });
+                    options.Add(new Expansion() { Start = start, End = endOptions, PossibleExpansionsCount = endOptions.Sum(eo => eo.PossibleExpansionsCount) });
                 }
             }
             else
             {
-                options.Add(new Expansion() { Start = start, End = new List<Expansion>() });
+                options.Add(new Expansion() { Start = start });
             }
         }
     }
@@ -66,4 +72,6 @@ class Expansion
     public string Start { get; init; }
 
     public List<Expansion> End { get; init; }
+
+    public long PossibleExpansionsCount { get; init; } = 1;
 }
