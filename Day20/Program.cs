@@ -57,7 +57,7 @@ foreach (var group in shortcuts.GroupBy(s => s.Saving).OrderBy(g => g.Key))
     Console.WriteLine($"Shortcuts {group.Key} = {group.Count()}");
 }
 
-var total = shortcuts.Count(s => s.Saving >= 50);
+var total = shortcuts.Count(s => s.Saving >= 100);
 
 Console.WriteLine($"Total = {total}");
 
