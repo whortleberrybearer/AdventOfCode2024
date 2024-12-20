@@ -1,6 +1,4 @@
-﻿
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(i => i.ToCharArray()).ToArray();
 
 Position startPosition = new Position();
@@ -51,9 +49,15 @@ for (var row = 0; row < grid.Length; row++)
 Console.WriteLine();
 Console.WriteLine($"Found end in: {path.Cost}");
 
-var shortcuts = FindShortcut(path);
+//var shortcuts = FindShortcut(path);
+var shortcuts = FindLongShortcut(path);
 
-var total = shortcuts.Count(s => s.Saving >= 100);
+foreach (var group in shortcuts.GroupBy(s => s.Saving).OrderBy(g => g.Key))
+{
+    Console.WriteLine($"Shortcuts {group.Key} = {group.Count()}");
+}
+
+var total = shortcuts.Count(s => s.Saving >= 50);
 
 Console.WriteLine($"Total = {total}");
 
@@ -224,6 +228,45 @@ List<Shortcut> FindShortcut(Path path)
     return shortcuts;
 }
 
+List<Shortcut> FindLongShortcut(Path path)
+{
+    var shortcuts = new List<Shortcut>();
+    var positions = path.Movements.Select(m => m.Position).ToArray();
+
+    for (var i = 0; i < positions.Length; i++)
+    {
+        var currentPosition = positions[i];
+        var remainIngPositions = positions.Skip(i + 1).ToList();
+
+        foreach (var remainingPosition in remainIngPositions)
+        {
+            var distanceTo = currentPosition.DistanceTo(remainingPosition);
+
+            if (distanceTo <= 20)
+            {
+                var shortcutDistance = remainIngPositions.IndexOf(remainingPosition) - distanceTo + 1;
+
+                // If shortcut is 0, we just followed the path.
+                if (shortcutDistance > 0)
+                {
+                    Console.WriteLine($"Cheat {currentPosition.X},{currentPosition.Y} -> {remainingPosition.X},{remainingPosition.Y} = {shortcutDistance}");
+
+                    var shortcut = new Shortcut()
+                    {
+                        CurrentPosition = currentPosition,
+                        NewPosition = remainingPosition,
+                        Saving = shortcutDistance,
+                    };
+
+                    shortcuts.Add(shortcut);
+                }
+            }
+        }
+    }
+
+    return shortcuts;
+}
+
 Shortcut? CheckShortcut(List<Position> positions, Position currentPosition, int moveX, int moveY)
 {
     var nextPosition = new Position() { X = currentPosition.X + moveX, Y = currentPosition.Y + moveY };
@@ -256,6 +299,11 @@ class Position
     public int X { get; init; }
 
     public int Y { get; init; }
+
+    public int DistanceTo(Position position)
+    {
+        return Math.Abs(position.X - X) + Math.Abs(position.Y - Y);
+    }
 }
 
 class Movement
