@@ -1,4 +1,6 @@
-﻿var input = File.ReadAllLines("Input.txt");
+﻿
+
+var input = File.ReadAllLines("Input.txt");
 var grid = input.Select(i => i.ToCharArray()).ToArray();
 
 Position startPosition = new Position();
@@ -48,6 +50,8 @@ for (var row = 0; row < grid.Length; row++)
 
 Console.WriteLine();
 Console.WriteLine($"Found end in: {path.Cost}");
+
+FindShortcut(path);
 
 var total = 0;
 
@@ -166,7 +170,58 @@ IEnumerable<Movement> GetPossibleMovements(Position position)
     return movements;
 }
 
-struct Position
+void FindShortcut(Path path)
+{
+    var positions = path.Movements.Select(m => m.Position).ToArray();
+
+    for (var i = 0; i < positions.Length; i++)
+    {
+        var currentPosition = positions[i];
+        var remainingPositions = positions.Skip(i + 1).ToList();
+
+        if (currentPosition.Y < (grid.Length - 1))
+        {
+            CheckShortcut(remainingPositions, currentPosition, 0, 1);
+        }
+
+        if (currentPosition.Y > 0)
+        { 
+            CheckShortcut(remainingPositions, currentPosition, 0, -1);
+        }
+
+        if (currentPosition.X < (grid[currentPosition.Y].Length - 1))
+        {
+            CheckShortcut(remainingPositions, currentPosition, 1, 0);
+        }
+
+        if (currentPosition.X > 0)
+        {
+            CheckShortcut(remainingPositions, currentPosition, -1, 0);
+        }
+    }
+}
+
+void CheckShortcut(List<Position> positions, Position currentPosition, int moveX, int moveY)
+{
+    var nextPosition = new Position() { X = currentPosition.X + moveX, Y = currentPosition.Y + moveY };
+
+    if (grid[nextPosition.Y][nextPosition.X] != '#')
+    {
+        // Not jumping though a wall, so dont bother checking anymore.
+        return;
+    }
+
+    var skipTo = positions.FirstOrDefault(p => (p.X == nextPosition.X + moveX) && (p.Y == nextPosition.Y + moveY));
+
+    if (skipTo is not null)
+    {
+        var shortcut = positions.IndexOf(skipTo);
+
+        Console.WriteLine($"Cheat {nextPosition.X},{nextPosition.Y} = {shortcut}");
+    }
+}
+
+class Position
 {
     public int X { get; init; }
 
