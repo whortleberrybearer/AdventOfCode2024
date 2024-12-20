@@ -53,7 +53,7 @@ Console.WriteLine($"Found end in: {path.Cost}");
 
 var shortcuts = FindShortcut(path);
 
-var total = shortcuts.Count;
+var total = shortcuts.Count(s => s.Saving >= 100);
 
 Console.WriteLine($"Total = {total}");
 
