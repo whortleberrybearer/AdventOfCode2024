@@ -51,9 +51,9 @@ for (var row = 0; row < grid.Length; row++)
 Console.WriteLine();
 Console.WriteLine($"Found end in: {path.Cost}");
 
-FindShortcut(path);
+var shortcuts = FindShortcut(path);
 
-var total = 0;
+var total = shortcuts.Count;
 
 Console.WriteLine($"Total = {total}");
 
@@ -170,8 +170,9 @@ IEnumerable<Movement> GetPossibleMovements(Position position)
     return movements;
 }
 
-void FindShortcut(Path path)
+List<Shortcut> FindShortcut(Path path)
 {
+    var shortcuts = new List<Shortcut>();
     var positions = path.Movements.Select(m => m.Position).ToArray();
 
     for (var i = 0; i < positions.Length; i++)
@@ -181,44 +182,73 @@ void FindShortcut(Path path)
 
         if (currentPosition.Y < (grid.Length - 1))
         {
-            CheckShortcut(remainingPositions, currentPosition, 0, 1);
+            var shortcut = CheckShortcut(remainingPositions, currentPosition, 0, 1);
+
+            if (shortcut is not null)
+            {
+                shortcuts.Add(shortcut);
+            }
         }
 
         if (currentPosition.Y > 0)
-        { 
-            CheckShortcut(remainingPositions, currentPosition, 0, -1);
+        {
+            var shortcut = CheckShortcut(remainingPositions, currentPosition, 0, -1);
+
+            if (shortcut is not null)
+            {
+                shortcuts.Add(shortcut);
+            }
         }
 
         if (currentPosition.X < (grid[currentPosition.Y].Length - 1))
         {
-            CheckShortcut(remainingPositions, currentPosition, 1, 0);
+            var shortcut = CheckShortcut(remainingPositions, currentPosition, 1, 0);
+
+            if (shortcut is not null)
+            {
+                shortcuts.Add(shortcut);
+            }
         }
 
         if (currentPosition.X > 0)
         {
-            CheckShortcut(remainingPositions, currentPosition, -1, 0);
+            var shortcut = CheckShortcut(remainingPositions, currentPosition, -1, 0);
+
+            if (shortcut is not null)
+            {
+                shortcuts.Add(shortcut);
+            }
         }
     }
+
+    return shortcuts;
 }
 
-void CheckShortcut(List<Position> positions, Position currentPosition, int moveX, int moveY)
+Shortcut? CheckShortcut(List<Position> positions, Position currentPosition, int moveX, int moveY)
 {
     var nextPosition = new Position() { X = currentPosition.X + moveX, Y = currentPosition.Y + moveY };
 
-    if (grid[nextPosition.Y][nextPosition.X] != '#')
+    if (grid[nextPosition.Y][nextPosition.X] == '#')
     {
-        // Not jumping though a wall, so dont bother checking anymore.
-        return;
+        var skipTo = positions.FirstOrDefault(p => (p.X == nextPosition.X + moveX) && (p.Y == nextPosition.Y + moveY));
+
+        if (skipTo is not null)
+        {
+            var shortcut = positions.IndexOf(skipTo);
+
+            Console.WriteLine($"Cheat {nextPosition.X},{nextPosition.Y} = {shortcut}");
+
+            return new Shortcut()
+            {
+                CurrentPosition = currentPosition,
+                NewPosition = nextPosition,
+                Saving = shortcut - 1,
+            };
+        }
     }
 
-    var skipTo = positions.FirstOrDefault(p => (p.X == nextPosition.X + moveX) && (p.Y == nextPosition.Y + moveY));
-
-    if (skipTo is not null)
-    {
-        var shortcut = positions.IndexOf(skipTo);
-
-        Console.WriteLine($"Cheat {nextPosition.X},{nextPosition.Y} = {shortcut}");
-    }
+    // Not jumping though a wall, so dont bother checking anymore.
+    return null;
 }
 
 class Position
@@ -238,4 +268,13 @@ class Path
     public List<Movement> Movements { get; } = new List<Movement>();
 
     public int Cost => Movements.Count;
+}
+
+class Shortcut
+{
+    public Position CurrentPosition { get; init; }
+
+    public Position NewPosition { get; init; }
+
+    public int Saving { get; init; }
 }
