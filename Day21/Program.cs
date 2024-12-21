@@ -7,30 +7,38 @@ var total = 0;
 
 foreach (var code in input)
 {
-    var sequences1 = numpad.FindSequence(code);
+    var possibleCombinations = new List<string>();
 
-    foreach (var sequence in sequences1)
+    foreach (var sequence1 in numpad.FindSequence(code))
     {
-        var buttonPresses1 = string.Join("A", sequence) + "A";
+        var buttonPresses1 = string.Join("A", sequence1) + "A";
 
         Console.WriteLine($"{code} = {buttonPresses1}");
+
+        foreach (var sequence2 in directionPad.FindSequence(buttonPresses1))
+        {
+            var buttonPresses2 = string.Join("A", sequence2) + "A";
+
+            Console.WriteLine($"{buttonPresses1} = {buttonPresses2}");
+
+            foreach (var sequence3 in directionPad.FindSequence(buttonPresses2))
+            {
+                var buttonPresses3 = string.Join("A", sequence3) + "A";
+
+                Console.WriteLine($"{buttonPresses2} = {buttonPresses3}");
+
+                possibleCombinations.Add(buttonPresses3);
+            }
+        }
     }
 
-    //var sequence2 = directionPad.FindSequence(buttonPresses1);
-    //var buttonPresses2 = string.Join("A", sequence2) + "A";
+    var shortest = possibleCombinations.OrderBy(pc => pc.Length).FirstOrDefault();
 
-    //Console.WriteLine($"{buttonPresses1} = {buttonPresses2}");
+    var calc = int.Parse(code.Replace("A", string.Empty)) * shortest.Length;
 
-    //var sequence3 = directionPad.FindSequence(buttonPresses2);
-    //var buttonPresses3 = string.Join("A", sequence3) + "A";
+    Console.WriteLine($"{shortest.Length} * {code.Replace("A", string.Empty).TrimStart('0')} = {calc}");
 
-    //Console.WriteLine($"{buttonPresses2} = {buttonPresses3}");
-
-    //var calc = int.Parse(code.Replace("A", string.Empty)) * buttonPresses3.Length;
-
-    //Console.WriteLine($"{buttonPresses3.Length} * {code.Replace("A", string.Empty).TrimStart('0')} = {calc}");
-
-    //total += calc;
+    total += calc;
 
     Console.WriteLine();
 }
@@ -67,7 +75,7 @@ class Numpad
                     {
                         var to = keys[i][j];
 
-                        if (to == ' ')
+                        if ((to == ' ') || (from == to))
                         {
                             continue;
                         }
@@ -166,7 +174,7 @@ class DirectionPad
             new char[] { '<', 'v', '>' },
         };
 
-    private Dictionary<string, string> keyExpansions = new Dictionary<string, string>();
+    private Dictionary<string, IEnumerable<string>> keyExpansions = new Dictionary<string, IEnumerable<string>>();
 
     public DirectionPad()
     {
@@ -192,38 +200,89 @@ class DirectionPad
                             continue;
                         }
 
-                        var key = $"{from}-{to}";
-
-                        if (!keyExpansions.ContainsKey(key))
-                        {
-
-                        }
+                        keyExpansions.Add($"{from}-{to}", GetPaths(x, y, j, i));
                     }
                 }
             }
         }
     }
 
-    public IEnumerable<string> FindSequence(string code)
+    private IEnumerable<string> GetPaths(int fromX, int fromY, int toX, int toY)
     {
-        var sequence = new List<string>();
+        var horizontal = fromX - toX;
+        var horizontalPath = "";
+
+        if (horizontal > 0)
+        {
+            horizontalPath = new string(Enumerable.Repeat('<', horizontal).ToArray());
+        }
+        else if (horizontal < 0)
+        {
+            horizontalPath = new string(Enumerable.Repeat('>', horizontal * -1).ToArray());
+        }
+
+        var vertical = fromY - toY;
+        var verticalPath = "";
+
+        if (vertical > 0)
+        {
+            verticalPath = new string(Enumerable.Repeat('^', vertical).ToArray());
+        }
+        else if (vertical < 0)
+        {
+            verticalPath = new string(Enumerable.Repeat('v', vertical * -1).ToArray());
+        }
+
+        var permuter = new StringPermuter(verticalPath + horizontalPath);
+        var options = permuter.Permute().Distinct().ToList();
+
+        // This is a hack to remove any path through the ' '.
+        if (fromY == 0 || fromX == 0)
+        {
+            foreach (var option in options.ToArray())
+            {
+                if ((fromX == 2 && option.StartsWith("<<")) ||
+                    (fromX == 1 && option.StartsWith("<")) ||
+                    (fromY == 1 && option.StartsWith("^")))
+                {
+                    options.Remove(option);
+                }
+            }
+        }
+
+        return options;
+    }
+
+    public IEnumerable<List<string>> FindSequence(string code)
+    {
+        var sequences = new List<List<string>>();
         var currentPosition = 'A';
 
         for (var i = 0; i < code.Length; i++)
         {
-            if (currentPosition != code[i])
-            {
-                sequence.Add(keyExpansions[$"{currentPosition}-{code[i]}"]);
+            var expansions = currentPosition != code[i] ? keyExpansions[$"{currentPosition}-{code[i]}"] : new string[1];
+            var newSequence = new List<List<string>>();
 
-                currentPosition = code[i];
-            }
-            else
+            foreach (var expansion in expansions)
             {
-                sequence.Add("");
+                if (!sequences.Any())
+                {
+                    newSequence.Add(new List<string> { expansion });
+                }
+                else
+                {
+                    foreach (var s in sequences)
+                    {
+                        newSequence.Add(s.Append(expansion).ToList());
+                    }
+                }
             }
+
+            sequences = newSequence;
+            currentPosition = code[i];
         }
 
-        return sequence;
+        return sequences;
     }
 }
 
