@@ -67,18 +67,12 @@ class Numpad
                     {
                         var to = keys[i][j];
 
-                        if ((to == ' ') || (from == to))
+                        if (to == ' ')
                         {
                             continue;
                         }
 
-                        var key = $"{from}-{to}";
-
-                        if (!keyExpansions.ContainsKey(key))
-                        {
-                            keyExpansions.Add(key, GetPaths(x, y, j, i));
-                            keyExpansions.Add($"{to}-{from}", GetPaths(j, i, x, y));
-                        }
+                        keyExpansions.Add($"{from}-{to}", GetPaths(x, y, j, i));
                     }
                 }
             }
@@ -202,23 +196,7 @@ class DirectionPad
 
                         if (!keyExpansions.ContainsKey(key))
                         {
-                            var accross = x - j;
-                            var path = "";
-                            var reversePath = "";
 
-                            if (accross > 0)
-                            {
-                                path = new string(Enumerable.Repeat('<', x - j).ToArray());
-                                reversePath = new string(Enumerable.Repeat('>', x - j).ToArray());
-                            }
-                            else if (accross < 0)
-                            {
-                                path = new string(Enumerable.Repeat('>', accross * -1).ToArray());
-                                reversePath = new string(Enumerable.Repeat('<', accross * -1).ToArray());
-                            }
-
-                            keyExpansions.Add(key, $"{new string(Enumerable.Repeat('v', i - y).ToArray())}{path}");
-                            keyExpansions.Add($"{to}-{from}", $"{reversePath}{new string(Enumerable.Repeat('^', i - y).ToArray())}");
                         }
                     }
                 }
