@@ -1,7 +1,4 @@
-﻿
-
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 
 //var total = 0L;
 var buyerOptions = new List<BuyerOption>();
