@@ -84,30 +84,14 @@ Item CalcaulateItem(long secretNumber, long? previosBananas)
 
 long FindBestSequence()
 {
-    var bestTotal = 0L;
-    var possibleSequences = new List<string>();
+    var bananasCount = new Dictionary<string, long>();
 
     foreach (var buyerOption in buyerOptions)
     {
-        possibleSequences.AddRange(buyerOption.FindPossibleSequences());
+        buyerOption.FindSequenceBananas(bananasCount);
     }
 
-    foreach (var group in possibleSequences.GroupBy(ps => ps).OrderBy(g => g.Count()))
-    {
-        var total = 0L;
-
-        foreach (var buyerOption in buyerOptions)
-        {
-            total += buyerOption.FindSequenceBananas(group.Key.Split(",").Select(c => int.Parse(c)).ToArray());
-        }
-
-        if (total > bestTotal)
-        {
-            bestTotal = total;
-        }
-    }
-
-    return bestTotal;
+    return bananasCount.Max(bc => bc.Value);
 }
 
 class Item
@@ -121,31 +105,27 @@ class BuyerOption
 {
     public List<Item> Items { get; } = new List<Item>();
 
-    public long FindSequenceBananas(int[] sequence)
-    {
-        for (var i = 0; i < Items.Count - 3; i++)
-        {
-            if (Items[i].Change == sequence[0] &&
-                Items[i + 1].Change == sequence[1] &&
-                Items[i + 2].Change == sequence[2] &&
-                Items[i + 3].Change == sequence[3])
-            {
-                return Items[i + 3].Bananas;
-            }
-        }
-
-        return 0;
-    }
-
-    internal List<string> FindPossibleSequences()
+    public void FindSequenceBananas(Dictionary<string, long> bananasCount)
     {
         var sequences = new List<string>();
 
-        for (var i = 1; i < Items.Count - 4; i++)
+        for (var i = 0; i < Items.Count - 3; i++)
         {
-            sequences.Add(string.Join(',', Items.Skip(i).Take(4).Select(i => i.Change)));
-        }
+            var key = string.Join(',', Items.Skip(i).Take(4).Select(i => i.Change));
 
-        return sequences.Distinct().ToList();
+            if (!sequences.Contains(key))
+            {
+                sequences.Add(key);
+
+                if (!bananasCount.ContainsKey(key))
+                {
+                    bananasCount.Add(key, Items[i + 3].Bananas);
+                }
+                else
+                {
+                    bananasCount[key] += Items[i + 3].Bananas;
+                }
+            }
+        }
     }
 }
