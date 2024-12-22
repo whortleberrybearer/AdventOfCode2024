@@ -1,5 +1,6 @@
 ﻿
 
+
 var input = File.ReadAllLines("Input.txt");
 
 //var total = 0L;
@@ -83,14 +84,30 @@ Item CalcaulateItem(long secretNumber, long? previosBananas)
 
 long FindBestSequence()
 {
-    var total = 0L;
+    var bestTotal = 0L;
+    var possibleSequences = new List<string>();
 
     foreach (var buyerOption in buyerOptions)
     {
-        total += buyerOption.FindSewuenceBananas(new int[] { -2, 1, -1, 3 });
+        possibleSequences.AddRange(buyerOption.FindPossibleSequences());
     }
 
-    return total;
+    foreach (var group in possibleSequences.GroupBy(ps => ps).OrderBy(g => g.Count()))
+    {
+        var total = 0L;
+
+        foreach (var buyerOption in buyerOptions)
+        {
+            total += buyerOption.FindSequenceBananas(group.Key.Split(",").Select(c => int.Parse(c)).ToArray());
+        }
+
+        if (total > bestTotal)
+        {
+            bestTotal = total;
+        }
+    }
+
+    return bestTotal;
 }
 
 class Item
@@ -104,9 +121,9 @@ class BuyerOption
 {
     public List<Item> Items { get; } = new List<Item>();
 
-    public long FindSewuenceBananas(int[] sequence)
+    public long FindSequenceBananas(int[] sequence)
     {
-        for (var i = 0; i < Items.Count; i++)
+        for (var i = 0; i < Items.Count - 3; i++)
         {
             if (Items[i].Change == sequence[0] &&
                 Items[i + 1].Change == sequence[1] &&
@@ -118,5 +135,17 @@ class BuyerOption
         }
 
         return 0;
+    }
+
+    internal List<string> FindPossibleSequences()
+    {
+        var sequences = new List<string>();
+
+        for (var i = 1; i < Items.Count - 4; i++)
+        {
+            sequences.Add(string.Join(',', Items.Skip(i).Take(4).Select(i => i.Change)));
+        }
+
+        return sequences.Distinct().ToList();
     }
 }
