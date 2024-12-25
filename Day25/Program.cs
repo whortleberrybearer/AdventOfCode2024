@@ -9,11 +9,19 @@ for (var i = 0; i < input.Length; i += 8)
 
     if (grid[0][0] == '#')
     {
-        locks.Add(new Lock() { Bits = ExtractBits(grid) });
+        var lck = new Lock() { Bits = ExtractLockBits(grid) };
+
+        Console.WriteLine($"Lock: {string.Join(",", lck.Bits)}");
+
+        locks.Add(lck);
     }
     else if (grid[0][0] == '.')
     {
-        keys.Add(new Key() { Bits = ExtractBits(grid) });
+        var key = new Key() { Bits = ExtractKeyBits(grid) };
+
+        Console.WriteLine($"Key: {string.Join(",", key.Bits)}");
+
+        keys.Add(key);
     }
 }
 
@@ -21,7 +29,7 @@ var total = 0;
 
 Console.WriteLine($"Total = {total}");
 
-int[] ExtractBits(char[][] grid)
+int[] ExtractLockBits(char[][] grid)
 {
     var bits = new List<int>();
     
@@ -44,6 +52,32 @@ int[] ExtractBits(char[][] grid)
         bits.Add(count);
     }
      
+    return bits.ToArray();
+}
+
+int[] ExtractKeyBits(char[][] grid)
+{
+    var bits = new List<int>();
+
+    for (var i = 0; i < grid[0].Length; i++)
+    {
+        var count = 0;
+
+        for (var j = grid.Length - 1; j > 0; j--)
+        {
+            if (grid[j][i] == '#')
+            {
+                count += 1;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        bits.Add(count);
+    }
+
     return bits.ToArray();
 }
 
