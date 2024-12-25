@@ -1,4 +1,5 @@
 ﻿
+
 var input = File.ReadAllLines("Input.txt");
 var locks = new List<Lock>();
 var keys = new List<Key>();
@@ -26,6 +27,19 @@ for (var i = 0; i < input.Length; i += 8)
 }
 
 var total = 0;
+
+foreach (var lck in locks)
+{
+    foreach (var key in keys)
+    {
+        if (lck.KeyFits(key))
+        {
+            Console.WriteLine($"Lock:{string.Join(",", lck.Bits)} and Key:{string.Join(",", key.Bits)} fit");
+
+            total += 1;
+        }
+    }
+}
 
 Console.WriteLine($"Total = {total}");
 
@@ -84,6 +98,19 @@ int[] ExtractKeyBits(char[][] grid)
 class Lock
 {
     public int[] Bits { get; init; }
+
+    internal bool KeyFits(Key key)
+    {
+        for (var i = 0; i < Bits.Length; i++)
+        {
+            if (Bits[i] + key.Bits[i] > 5)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 class Key
