@@ -1,6 +1,4 @@
-﻿
-
-var input = File.ReadAllLines("Input.txt");
+﻿var input = File.ReadAllLines("Input.txt");
 var locks = new List<Lock>();
 var keys = new List<Key>();
 
